@@ -42,7 +42,6 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 		app.serverError(w, r, err)
 		return
 	}
-
 	w.WriteHeader(status)
 	buf.WriteTo(w)
 }
