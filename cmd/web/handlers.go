@@ -16,6 +16,13 @@ type snippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -97,4 +104,46 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, r, http.StatusOK, "signup.tmpl.html", data)
+}
+
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+	var form userSignupForm
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
+	form.CheckField(
+		validator.MaxChars(form.Name, 100),
+		"name",
+		"This field cannot be more than 100 characters long",
+	)
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+	form.CheckField(
+		validator.MaxChars(form.Email, 100),
+		"email",
+		"This filed cannot be more than 100 characters long",
+	)
+
+	w.Write([]byte("Creat a new user..."))
+}
+
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Display a form for loggin in a user..."))
+}
+
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Authenticate and login the user..."))
+}
+
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Logout out user..."))
 }
