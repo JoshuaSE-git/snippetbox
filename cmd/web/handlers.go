@@ -30,6 +30,11 @@ type userLoginForm struct {
 	validator.Validator `       form:"-"`
 }
 
+const (
+	flash               = "flash"
+	authenticatedUserID = "authenticatedUserID"
+)
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
@@ -108,7 +113,7 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
+	app.sessionManager.Put(r.Context(), flash, "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
@@ -163,7 +168,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+	app.sessionManager.Put(r.Context(), flash, "Your signup was successful. Please log in.")
 
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
@@ -218,7 +223,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
+	app.sessionManager.Put(r.Context(), authenticatedUserID, id)
 
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
@@ -230,8 +235,8 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
-	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+	app.sessionManager.Remove(r.Context(), authenticatedUserID)
+	app.sessionManager.Put(r.Context(), flash, "You've been logged out successfully!")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
