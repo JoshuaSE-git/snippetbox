@@ -4,13 +4,14 @@ import (
 	"net/http"
 
 	"github.com/justinas/alice"
+
+	"github.com/JoshuaSE-git/snippetbox/ui"
 )
 
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	fileserver := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
-	mux.Handle("GET /static/", http.StripPrefix("/static/", fileserver))
+	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, preventCSRF, app.authenticate)
 
