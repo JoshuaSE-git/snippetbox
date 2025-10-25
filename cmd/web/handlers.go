@@ -39,6 +39,29 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+	id, ok := app.sessionManager.Get(r.Context(), authenticatedUserID).(int)
+	if !ok {
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	user, err := app.users.Get(id)
+	if err != nil {
+		if err == models.ErrNoRows {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.User = user
+
+	app.render(w, r, http.StatusOK, "account.tmpl.html", data)
+}
+
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	app.render(w, r, http.StatusOK, "about.tmpl.html", data)

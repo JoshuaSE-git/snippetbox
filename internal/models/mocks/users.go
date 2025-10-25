@@ -1,10 +1,29 @@
 package mocks
 
 import (
+	"time"
+
 	"github.com/JoshuaSE-git/snippetbox/internal/models"
 )
 
 type UserModel struct{}
+
+var mockUser = models.User{
+	ID:             1,
+	Name:           "Alice",
+	Email:          "alice@example.com",
+	HashedPassword: []byte("pa$$word"),
+	Created:        time.Now(),
+}
+
+func (m *UserModel) Get(id int) (models.User, error) {
+	switch id {
+	case 1:
+		return mockUser, nil
+	default:
+		return models.User{}, models.ErrNoRows
+	}
+}
 
 func (m *UserModel) Insert(name, email, password string) error {
 	switch email {
