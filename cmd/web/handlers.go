@@ -33,6 +33,7 @@ type userLoginForm struct {
 const (
 	flash               = "flash"
 	authenticatedUserID = "authenticatedUserID"
+	requestDestination  = "requestDestination"
 )
 
 func ping(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +258,12 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), authenticatedUserID, id)
 
-	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+	url, ok := app.sessionManager.Pop(r.Context(), requestDestination).(string)
+	if !ok {
+		http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
